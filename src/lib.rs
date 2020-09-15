@@ -23,14 +23,20 @@ fn kstretch(_py: Python, m: &PyModule) -> PyResult<()>
     m.add_wrapped(wrap_pyfunction!(process))
 }
 
-fn hash(input: &[u8]) -> GenericArray<u8, U64>
+pub fn hash(input: &[u8]) -> GenericArray<u8, U64>
 {
     let mut b = Blake2b::default();
     b.update(input);
     b.finalize()
 }
 
-fn hash_with_salt(input: &[u8], salt: &[u8]) -> GenericArray<u8, U64>
+///
+/// # Example
+/// ```
+/// assert_eq!(kstretch::hash_with_salt(b"123", b"456"),
+///            kstretch::hash(b"123456"));
+/// ```
+pub fn hash_with_salt(input: &[u8], salt: &[u8]) -> GenericArray<u8, U64>
 {
     let mut b = Blake2b::default();
     b.update(input);
