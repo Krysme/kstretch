@@ -53,7 +53,7 @@ fn digest(input: &[u8]) -> String
     (0..128u16)
         .into_par_iter()
         .map(|index| hash_with_salt(&hashed, &index.to_be_bytes()))
-        .map(|input| compute(input))
+        .map(compute)
         .collect::<Vec<_>>()
         .iter()
         .for_each(|it| blake.update(&it));
