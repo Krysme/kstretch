@@ -1,7 +1,5 @@
 use blake2::Blake2b512;
 use blake2::{Blake2b, Digest};
-use generic_array::typenum::*;
-use generic_array::GenericArray;
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
@@ -22,10 +20,10 @@ fn kstretch(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(process))
 }
 
-pub fn hash(input: &[u8]) -> GenericArray<u8, U64> {
-    let mut b = Blake2b::default();
+pub fn hash(input: &[u8]) -> [u8;64] {
+    let mut b = Blake2b512::default();
     b.update(input);
-    b.finalize()
+    b.finalize().into()
 }
 
 ///
@@ -34,11 +32,11 @@ pub fn hash(input: &[u8]) -> GenericArray<u8, U64> {
 /// assert_eq!(kstretch::hash_with_salt(b"123", b"456"),
 ///            kstretch::hash(b"123456"));
 /// ```
-pub fn hash_with_salt(input: &[u8], salt: &[u8]) -> GenericArray<u8, U64> {
+pub fn hash_with_salt(input: &[u8], salt: &[u8]) -> [u8;64]{
     let mut b = Blake2b::default();
     b.update(input);
     b.update(salt);
-    b.finalize()
+    b.finalize().into()
 }
 
 fn digest(input: &[u8]) -> String {
@@ -52,13 +50,13 @@ fn digest(input: &[u8]) -> String {
         .map(compute)
         .collect::<Vec<_>>()
         .iter()
-        .for_each(|it| blake.update(&it));
+        .for_each(|it| blake.update(it));
 
     let blake_final = blake.finalize();
 
     hex::encode(&blake_final[0..blake_final.len() / 2])
 }
 
-fn compute(input: GenericArray<u8, U64>) -> GenericArray<u8, U64> {
+fn compute(input: [u8;64]) -> [u8;64]{
     (0..2u32.pow(25)).fold(input, |a, _| hash(&a))
 }
