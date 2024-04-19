@@ -16,8 +16,8 @@ pub fn process(input: &str) -> PyResult<String> {
 }
 
 #[pymodule]
-fn kstretch(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_wrapped(wrap_pyfunction!(process))
+fn kstretch(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(process,m)?)
 }
 
 pub fn hash(input: &[u8]) -> [u8;64] {
