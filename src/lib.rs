@@ -11,16 +11,19 @@ use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 /// # Return Value
 /// `String`: hexed output
 #[pyfunction]
-pub fn process(input: &str) -> PyResult<String> {
+pub fn process(input: &str) -> PyResult<String>
+{
     Ok(digest(input.as_bytes()))
 }
 
 #[pymodule]
-fn kstretch(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(process,m)?)
+fn kstretch(m: &Bound<'_, PyModule>) -> PyResult<()>
+{
+    m.add_function(wrap_pyfunction!(process, m)?)
 }
 
-pub fn hash(input: &[u8]) -> [u8;64] {
+pub fn hash(input: &[u8]) -> [u8; 64]
+{
     let mut b = Blake2b512::default();
     b.update(input);
     b.finalize().into()
@@ -32,14 +35,16 @@ pub fn hash(input: &[u8]) -> [u8;64] {
 /// assert_eq!(kstretch::hash_with_salt(b"123", b"456"),
 ///            kstretch::hash(b"123456"));
 /// ```
-pub fn hash_with_salt(input: &[u8], salt: &[u8]) -> [u8;64]{
+pub fn hash_with_salt(input: &[u8], salt: &[u8]) -> [u8; 64]
+{
     let mut b = Blake2b::default();
     b.update(input);
     b.update(salt);
     b.finalize().into()
 }
 
-fn digest(input: &[u8]) -> String {
+fn digest(input: &[u8]) -> String
+{
     let hashed = hash(input);
 
     let mut blake = Blake2b512::default();
@@ -57,6 +62,7 @@ fn digest(input: &[u8]) -> String {
     hex::encode(&blake_final[0..blake_final.len() / 2])
 }
 
-fn compute(input: [u8;64]) -> [u8;64]{
+fn compute(input: [u8; 64]) -> [u8; 64]
+{
     (0..2u32.pow(25)).fold(input, |a, _| hash(&a))
 }
